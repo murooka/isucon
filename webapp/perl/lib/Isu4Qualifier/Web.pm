@@ -8,6 +8,9 @@ use DBIx::Sunny;
 use Digest::SHA qw/ sha256_hex /;
 use Data::Dumper;
 
+use DBIx::QueryLog;
+DBIx::QueryLog->explain(1);
+
 sub config {
   my ($self) = @_;
   $self->{_config} ||= {
