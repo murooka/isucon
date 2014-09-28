@@ -141,11 +141,17 @@ sub locked_users {
 };
 
 sub login_log {
-  my ($self, $ip, $user_id) = @_;
+  my ($self, $succeeded, $login, $ip, $user_id) = @_;
   $self->db->query(
-    'UPDATE users SET `last_logined_ip` = ?, `last_logined_at` = NOW() WHERE id = ?',
-    $ip, $user_id
+    'INSERT INTO login_log (`created_at`, `user_id`, `login`, `ip`, `succeeded`) VALUES (NOW(),?,?,?,?)',
+    $user_id, $login, $ip, ($succeeded ? 1 : 0)
   );
+  if ($succeeded) {
+    $self->db->query(
+      'UPDATE users SET `last_logined_ip` = ?, `last_logined_at` = NOW() WHERE id = ?',
+      $ip, $user_id
+    );
+  }
 };
 
 sub set_flash {
