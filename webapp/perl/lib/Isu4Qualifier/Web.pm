@@ -7,6 +7,7 @@ use Kossy;
 use DBIx::Sunny;
 use Digest::SHA qw/ sha256_hex /;
 use Data::Dumper;
+use Redis;
 
 use DBIx::QueryLog;
 DBIx::QueryLog->explain(1);
@@ -40,6 +41,12 @@ sub db {
   };
 }
 
+sub redis {
+  my ($self) = @_;
+
+  $self->{_redis} ||= Redis->new;
+}
+
 sub calculate_password_hash {
   my ($password, $salt) = @_;
   sha256_hex($password . ':' . $salt);
@@ -47,20 +54,16 @@ sub calculate_password_hash {
 
 sub user_locked {
   my ($self, $user) = @_;
-  my $log = $self->db->select_row(
-    'SELECT COUNT(1) AS failures FROM login_log WHERE user_id = ? AND id > IFNULL((select id from login_log where user_id = ? AND succeeded = 1 ORDER BY id DESC LIMIT 1), 0)',
-    $user->{'id'}, $user->{'id'});
 
-  $self->config->{user_lock_threshold} <= $log->{failures};
+  return 0 unless $user;
+
+  return $self->redis->sismember('locked_users', $user->{login});
 };
 
 sub ip_banned {
   my ($self, $ip) = @_;
-  my $log = $self->db->select_row(
-    'SELECT COUNT(1) AS failures FROM login_log WHERE ip = ? AND id > IFNULL((select id from login_log where ip = ? AND succeeded = 1 ORDER BY id DESC LIMIT 1), 0)',
-    $ip, $ip);
 
-  $self->config->{ip_ban_threshold} <= $log->{failures};
+  return $self->redis->sismember('banned_ips', $ip);
 };
 
 sub attempt_login {
@@ -68,25 +71,34 @@ sub attempt_login {
   my $user = $self->db->select_row('SELECT * FROM users WHERE login = ?', $login);
 
   if ($self->ip_banned($ip)) {
-    $self->login_log(0, $login, $ip, $user ? $user->{id} : undef);
     return undef, 'banned';
   }
 
   if ($self->user_locked($user)) {
-    $self->login_log(0, $login, $ip, $user->{id});
     return undef, 'locked';
   }
 
   if ($user && calculate_password_hash($password, $user->{salt}) eq $user->{password_hash}) {
-    $self->login_log(1, $login, $ip, $user->{id});
+    $self->redis->set("ip-$ip", 0);
+    $self->redis->set("user-$user->{id}", 0);
+    $self->redis->srem('banned_ips', $ip);
+    $self->redis->srem('locked_users', $user->{login});
+    $self->login_log(1, $user->{login}, $ip, $user->{id});
     return $user, undef;
   }
   elsif ($user) {
-    $self->login_log(0, $login, $ip, $user->{id});
+    $self->redis->incr("ip-$ip");
+    $self->redis->incr("user-$user->{id}");
+    $self->redis->sadd('banned_ips', $ip)
+      if $self->redis->get("ip-$ip") > $self->config->{ip_ban_threshold};
+    $self->redis->sadd('locked_users', $user->{id})
+      if $self->redis->get("user-$user->{id}") > $self->config->{user_lock_threshold};
     return undef, 'wrong_password';
   }
   else {
-    $self->login_log(0, $login, $ip);
+    $self->redis->incr("ip-$ip");
+    $self->redis->sadd('banned_ips', $ip)
+      if $self->redis->get("ip-$ip") > $self->config->{ip_ban_threshold};
     return undef, 'wrong_login';
   }
 };
@@ -109,48 +121,14 @@ sub last_login {
 
 sub banned_ips {
   my ($self) = @_;
-  my @ips;
-  my $threshold = $self->config->{ip_ban_threshold};
 
-  my $not_succeeded = $self->db->select_all('SELECT ip FROM (SELECT ip, MAX(succeeded) as max_succeeded, COUNT(1) as cnt FROM login_log GROUP BY ip) AS t0 WHERE t0.max_succeeded = 0 AND t0.cnt >= ?', $threshold);
-
-  foreach my $row (@$not_succeeded) {
-    push @ips, $row->{ip};
-  }
-
-  my $last_succeeds = $self->db->select_all('SELECT ip, MAX(id) AS last_login_id FROM login_log WHERE succeeded = 1 GROUP by ip');
-
-  foreach my $row (@$last_succeeds) {
-    my $count = $self->db->select_one('SELECT COUNT(1) AS cnt FROM login_log WHERE ip = ? AND ? < id', $row->{ip}, $row->{last_login_id});
-    if ($threshold <= $count) {
-      push @ips, $row->{ip};
-    }
-  }
-
-  \@ips;
+  return $self->redis->smembers('banned_ips');
 };
 
 sub locked_users {
   my ($self) = @_;
-  my @user_ids;
-  my $threshold = $self->config->{user_lock_threshold};
 
-  my $not_succeeded = $self->db->select_all('SELECT user_id, login FROM (SELECT user_id, login, MAX(succeeded) as max_succeeded, COUNT(1) as cnt FROM login_log GROUP BY user_id) AS t0 WHERE t0.user_id IS NOT NULL AND t0.max_succeeded = 0 AND t0.cnt >= ?', $threshold);
-
-  foreach my $row (@$not_succeeded) {
-    push @user_ids, $row->{login};
-  }
-
-  my $last_succeeds = $self->db->select_all('SELECT user_id, login, MAX(id) AS last_login_id FROM login_log WHERE user_id IS NOT NULL AND succeeded = 1 GROUP BY user_id');
-
-  foreach my $row (@$last_succeeds) {
-    my $count = $self->db->select_one('SELECT COUNT(1) AS cnt FROM login_log WHERE user_id = ? AND ? < id', $row->{user_id}, $row->{last_login_id});
-    if ($threshold <= $count) {
-      push @user_ids, $row->{login};
-    }
-  }
-
-  \@user_ids;
+  return $self->redis->smembers('locked_users');
 };
 
 sub login_log {
