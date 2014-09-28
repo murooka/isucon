@@ -98,7 +98,7 @@ sub last_login {
   my ($self, $user_id) = @_;
 
   my $logs = $self->db->select_all(
-   'SELECT * FROM login_log WHERE succeeded = 1 AND user_id = ? ORDER BY id DESC LIMIT 2',
+   'SELECT ip, login, created_at FROM login_log WHERE succeeded = 1 AND user_id = ? ORDER BY id DESC LIMIT 2',
    $user_id);
 
   @$logs[-1];
