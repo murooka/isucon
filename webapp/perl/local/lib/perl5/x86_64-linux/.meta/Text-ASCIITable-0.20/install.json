@@ -1,0 +1,1 @@
+{"dist":"Text-ASCIITable-0.20","provides":{"Text::ASCIITable":{"file":"lib/Text/ASCIITable.pm","version":"0.20"},"Text::ASCIITable::Wrap":{"file":"lib/Text/ASCIITable/Wrap.pm","version":"0.2"}},"name":"Text::ASCIITable","pathname":"L/LU/LUNATIC/Text-ASCIITable-0.20.tar.gz","version":"0.20","target":"Text::ASCIITable"}

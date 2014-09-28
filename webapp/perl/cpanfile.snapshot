@@ -209,6 +209,19 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 6.48
       Test::Simple 0.90
       perl 5.008
+  DBIx-QueryLog-0.39
+    pathname: X/XA/XAICRON/DBIx-QueryLog-0.39.tar.gz
+    provides:
+      DBIx::QueryLog 0.39
+    requirements:
+      DBI 0
+      Data::Dumper 0
+      ExtUtils::MakeMaker 6.59
+      Module::Build 0.38
+      Term::ANSIColor 0
+      Text::ASCIITable 0
+      Time::HiRes 0
+      perl 5.008001
   DBIx-Sunny-0.22
     pathname: K/KA/KAZEBURO/DBIx-Sunny-0.22.tar.gz
     provides:
@@ -564,6 +577,21 @@ DISTRIBUTIONS
       Encode 2.10
       Exporter 5.57
       ExtUtils::MakeMaker 6.30
+  IO-Socket-Timeout-0.27
+    pathname: D/DA/DAMS/IO-Socket-Timeout-0.27.tar.gz
+    provides:
+      IO::Socket::Timeout 0.27
+      IO::Socket::Timeout::Role::PerlIO 0.27
+      IO::Socket::Timeout::Role::SetSockOpt 0.27
+    requirements:
+      ExtUtils::MakeMaker 6.30
+      File::Spec 0
+      IO::Handle 0
+      IPC::Open3 0
+      Module::Build::Tiny 0.036
+      PerlIO::via::Timeout 0.28
+      Test::More 0
+      Test::TCP 0
   JSON-2.90
     pathname: M/MA/MAKAMAKA/JSON-2.90.tar.gz
     provides:
@@ -826,6 +854,22 @@ DISTRIBUTIONS
       POSIX 0
       Time::Local 0
       perl 5.008001
+  PerlIO-via-Timeout-0.29
+    pathname: D/DA/DAMS/PerlIO-via-Timeout-0.29.tar.gz
+    provides:
+      PerlIO::via::Timeout 0.29
+    requirements:
+      Exporter 5.57
+      ExtUtils::MakeMaker 6.30
+      File::Spec 0
+      IO::Handle 0
+      IPC::Open3 0
+      Module::Build::Tiny 0.030
+      PerlIO::via 0
+      Scalar::Util 0
+      Test::More 0
+      Test::TCP 0
+      Time::Out 0
   Plack-1.0031
     pathname: M/MI/MIYAGAWA/Plack-1.0031.tar.gz
     provides:
@@ -952,6 +996,19 @@ DISTRIBUTIONS
       Digest::SHA1 0
       Module::Build::Tiny 0.037
       Plack 0.9910
+  Redis-1.975
+    pathname: D/DA/DAMS/Redis-1.975.tar.gz
+    provides:
+      Redis 1.975
+      Redis::Hash 1.975
+      Redis::List 1.975
+      Redis::Sentinel 1.975
+    requirements:
+      ExtUtils::MakeMaker 6.63_03
+      IO::Socket::Timeout 0.22
+      Module::Build::Tiny 0.036
+      Try::Tiny 0
+      perl 5.008
   Router-Boom-1.01
     pathname: T/TO/TOKUHIROM/Router-Boom-1.01.tar.gz
     provides:
@@ -1109,6 +1166,16 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       Test::Builder 0
+  Text-ASCIITable-0.20
+    pathname: L/LU/LUNATIC/Text-ASCIITable-0.20.tar.gz
+    provides:
+      Text::ASCIITable 0.20
+      Text::ASCIITable::Wrap 0.2
+    requirements:
+      Carp 0
+      Encode 0
+      List::Util 0
+      perl v5.6.0
   Text-Xslate-3.3.3
     pathname: S/SY/SYOHEX/Text-Xslate-3.3.3.tar.gz
     provides:
@@ -1156,6 +1223,12 @@ DISTRIBUTIONS
       Scalar::Util 0
       Text::Xslate 1.3000
       perl 5.008001
+  Time-Out-0.11
+    pathname: P/PA/PATL/Time-Out-0.11.tar.gz
+    provides:
+      Time::Out 0.11
+    requirements:
+      ExtUtils::MakeMaker 0
   Try-Tiny-0.22
     pathname: D/DO/DOY/Try-Tiny-0.22.tar.gz
     provides:

@@ -9,8 +9,8 @@ use Digest::SHA qw/ sha256_hex /;
 use Data::Dumper;
 use Redis;
 
-use DBIx::QueryLog;
-DBIx::QueryLog->explain(1);
+#use DBIx::QueryLog;
+#DBIx::QueryLog->explain(1);
 
 sub config {
   my ($self) = @_;

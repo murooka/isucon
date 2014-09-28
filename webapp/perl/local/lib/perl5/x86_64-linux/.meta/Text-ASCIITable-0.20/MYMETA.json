@@ -1,0 +1,28 @@
+{
+   "abstract" : "Create a nice formatted table using ASCII characters.",
+   "author" : [
+      "H\\xE5kon Nessj\\xF8en, <lunatic@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.421",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Text-ASCIITable",
+   "prereqs" : {
+      "runtime" : {
+         "requires" : {
+            "Carp" : "0",
+            "Encode" : "0",
+            "List::Util" : "0",
+            "perl" : "v5.6.0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.20"
+}

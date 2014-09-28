@@ -1,0 +1,6 @@
+/home/isucon/webapp/perl/local/bin/mysql_bench.pl
+/home/isucon/webapp/perl/local/bin/mysql_bench_skip_bind.pl
+/home/isucon/webapp/perl/local/bin/profile.pl
+/home/isucon/webapp/perl/local/bin/profile.sh
+/home/isucon/webapp/perl/local/bin/sqlite_bench.pl
+/home/isucon/webapp/perl/local/lib/perl5/DBIx/QueryLog.pm
