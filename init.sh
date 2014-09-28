@@ -12,4 +12,6 @@ mysql -h ${myhost} -P ${myport} -u ${myuser} ${mydb} < sql/schema.sql
 mysql -h ${myhost} -P ${myport} -u ${myuser} ${mydb} < sql/dummy_users.sql
 mysql -h ${myhost} -P ${myport} -u ${myuser} ${mydb} < sql/dummy_log.sql
 
-/home/isucon/env.sh carton exec init.pl
+redis-cli FLUSHDB
+redis-cli FLUSHALL
+cd /home/isucon/webapp/perl && /home/isucon/env.sh carton exec perl init3.pl

@@ -6,6 +6,7 @@ use feature 'state';
 
 use DBI;
 use Redis;
+use DBIx::Sunny;
 
 sub db {
     my $host = $ENV{ISU4_DB_HOST} || '127.0.0.1';
@@ -32,21 +33,37 @@ sub redis {
 }
 
 my $users = db->select_all("SELECT * FROM users");
+print "Num of users:" . scalar(@$users) . "\n";
 my $ips = db->select_all("SELECT DISTINCT ip FROM login_log");
+print "Num of ips:" . scalar(@$ips) . "\n";
+
+my $user_count = 0;
 for my $user (@$users) {
     my $failures = db->select_row("SELECT COUNT(1) AS failures FROM login_log WHERE user_id = ? AND id > IFNULL((select id from login_log where user_id = ? AND succeeded = 1 ORDER BY id DESC LIMIT 1), 0)", $user->{id}, $user->{id});
 
-    redis->set("user-$user->{id}", $failures);
+    redis->set("user-$user->{id}", $failures->{failures});
     if ($failures > $ENV{ISU4_USER_LOCK_THRESHOLD}) {
         redis->sadd('locked_users', $user->{login})
     }
+
+    if ($user_count % 1000 == 0) {
+	print "Finish: $user_count\n";
+    }
+
+    $user_count++;
 }
 
+my $ip_count = 0;
 for my $ip (@$ips) {
     my $failures = db->select_row("SELECT COUNT(1) AS failures FROM login_log WHERE ip = ? AND id > IFNULL((select id from login_log where ip = ? AND succeeded = 1 ORDER BY id DESC LIMIT 1), 0)", $ip, $ip);
 
-    redis->set("ip-$ip", 0);
+    redis->set("ip-$ip", $failures->{failures});
     if ($failures > $ENV{ISU4_IP_BAN_THRESHOLD}) {
-        redis->srem('banned_ips', $ip);
+        redis->sadd('banned_ips', $ip);
     }
+
+    if ($ip_count % 1000 == 0) {
+	print "Finish: $ip_count\n";
+    }
+    $ip_count++;
 }
