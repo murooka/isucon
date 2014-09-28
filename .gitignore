@@ -18,3 +18,5 @@ benchmarker
 /.lesshst
 /.gitconfig
 /.viminfo
+/.bash_history
+/.rediscli_history

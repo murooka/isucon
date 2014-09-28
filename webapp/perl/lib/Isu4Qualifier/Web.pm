@@ -91,7 +91,7 @@ sub attempt_login {
     $self->redis->incr("user-$user->{id}");
     $self->redis->sadd('banned_ips', $ip)
       if $self->redis->get("ip-$ip") > $self->config->{ip_ban_threshold};
-    $self->redis->sadd('locked_users', $user->{id})
+    $self->redis->sadd('locked_users', $user->{login})
       if $self->redis->get("user-$user->{id}") > $self->config->{user_lock_threshold};
     return undef, 'wrong_password';
   }
@@ -122,13 +122,13 @@ sub last_login {
 sub banned_ips {
   my ($self) = @_;
 
-  return $self->redis->smembers('banned_ips');
+  return $self->redis->smembers('banned_ips') || [];
 };
 
 sub locked_users {
   my ($self) = @_;
 
-  return $self->redis->smembers('locked_users');
+  return $self->redis->smembers('locked_users') || [];
 };
 
 sub login_log {
