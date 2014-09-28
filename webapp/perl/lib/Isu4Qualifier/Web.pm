@@ -154,7 +154,7 @@ sub login_log {
   my ($self, $succeeded, $login, $ip, $user_id) = @_;
   if ($succeeded) {
     $self->db->query(
-      'DELETE FROM login_log WHERE `user_id` = ?',
+      'DELETE FROM login_log WHERE `user_id` = ? AND `succeeded` = 0',
       $user_id
     );
   }
