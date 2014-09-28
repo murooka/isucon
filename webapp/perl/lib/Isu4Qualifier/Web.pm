@@ -199,6 +199,7 @@ post '/login' => sub {
 
   if ($user && $user->{id}) {
     $c->req->env->{'psgix.session'}->{user_id} = $user->{id};
+    $c->req->env->{'psgix.session'}->{user_login} = $user->{login};
     $c->redirect('/mypage');
   }
   else {
@@ -218,10 +219,10 @@ post '/login' => sub {
 get '/mypage' => [qw(session)] => sub {
   my ($self, $c) = @_;
   my $user_id = $c->req->env->{'psgix.session'}->{user_id};
-  my $user = $self->current_user($user_id);
+  my $user_login = $c->req->env->{'psgix.session'}->{user_login};
   my $msg;
 
-  if ($user) {
+  if ($user_login) {
     $c->render('mypage.tx', { last_login => $self->last_login($user_id) });
   }
   else {
