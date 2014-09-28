@@ -57,13 +57,19 @@ sub user_locked {
 
   return 0 unless $user;
 
-  return $self->redis->sismember('locked_users', $user->{login});
+  my $is_locked = $self->redis->sismember('locked_users', $user->{login});
+  print("User $user->{login} is locked!!") if ($is_locked);
+
+  return $ret;
 };
 
 sub ip_banned {
   my ($self, $ip) = @_;
 
-  return $self->redis->sismember('banned_ips', $ip);
+  my $is_locked = $self->redis->sismember('banned_ips', $ip);
+  print("IPaddr $ip is locked!!") if ($is_locked);
+
+  return $ret;
 };
 
 sub attempt_login {
@@ -195,6 +201,9 @@ get '/mypage' => [qw(session)] => sub {
   my ($self, $c) = @_;
   my $user_id = $c->req->env->{'psgix.session'}->{user_id};
   my $user = $self->current_user($user_id);
+
+  print("User $user->{login} accesses /mypage from IPaddr $c->req->address")
+
   my $msg;
 
   if ($user) {
