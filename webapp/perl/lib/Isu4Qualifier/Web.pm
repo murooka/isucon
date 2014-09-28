@@ -83,7 +83,9 @@ sub attempt_login {
     $self->redis->set("user-$user->{id}", 0);
     $self->redis->srem('banned_ips', $ip);
     $self->redis->srem('locked_users', $user->{login});
-    $self->login_log(1, $user->{login}, $ip, $user->{id});
+
+    $self->login_log($ip, $user->{id});
+
     return $user, undef;
   }
   elsif ($user) {
@@ -109,16 +111,6 @@ sub current_user {
   $self->db->select_row('SELECT * FROM users WHERE id = ?', $user_id);
 };
 
-sub last_login {
-  my ($self, $user_id) = @_;
-
-  my $logs = $self->db->select_all(
-   'SELECT * FROM login_log WHERE succeeded = 1 AND user_id = ? ORDER BY id DESC LIMIT 2',
-   $user_id);
-
-  @$logs[-1];
-};
-
 sub banned_ips {
   my ($self) = @_;
 
@@ -132,10 +124,10 @@ sub locked_users {
 };
 
 sub login_log {
-  my ($self, $succeeded, $login, $ip, $user_id) = @_;
+  my ($self, $ip, $user_id) = @_;
   $self->db->query(
-    'INSERT INTO login_log (`created_at`, `user_id`, `login`, `ip`, `succeeded`) VALUES (NOW(),?,?,?,?)',
-    $user_id, $login, $ip, ($succeeded ? 1 : 0)
+    'UPDATE users SET `last_logined_ip` = ?, `last_logined_at` = NOW() WHERE id = ?',
+    $ip, $user_id
   );
 };
 
@@ -203,7 +195,7 @@ get '/mypage' => [qw(session)] => sub {
   my $msg;
 
   if ($user) {
-    $c->render('mypage.tx', { last_login => $self->last_login($user_id) });
+    $c->render('mypage.tx', { user => $user });
   }
   else {
     $self->set_flash($c, "You must be logged in");
