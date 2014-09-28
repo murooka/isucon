@@ -91,16 +91,19 @@ sub attempt_login {
   elsif ($user) {
     $self->redis->incr("ip-$ip");
     $self->redis->incr("user-$user->{id}");
-    $self->redis->sadd('banned_ips', $ip)
-      if $self->redis->get("ip-$ip") > $self->config->{ip_ban_threshold};
-    $self->redis->sadd('locked_users', $user->{login})
-      if $self->redis->get("user-$user->{id}") > $self->config->{user_lock_threshold};
+    if ($self->redis->get("ip-$ip") >= $self->config->{ip_ban_threshold}) {
+      $self->redis->sadd('banned_ips', $ip);
+    }
+    if ($self->redis->get("user-$user->{id}") >= $self->config->{user_lock_threshold}) {
+      $self->redis->sadd('locked_users', $user->{login})
+    }
     return undef, 'wrong_password';
   }
   else {
     $self->redis->incr("ip-$ip");
-    $self->redis->sadd('banned_ips', $ip)
-      if $self->redis->get("ip-$ip") > $self->config->{ip_ban_threshold};
+    if ($self->redis->get("ip-$ip") >= $self->config->{ip_ban_threshold}) {
+      $self->redis->sadd('banned_ips', $ip)
+    }
     return undef, 'wrong_login';
   }
 };
