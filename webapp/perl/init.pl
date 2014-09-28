@@ -27,7 +27,7 @@ sub db {
     return $dbh;
 }
 
-my $logs = db->select_all("SELECT ip, user_id, succeeded FROM login_log ORDER BY id ASC");
+my $logs = db->select_all("SELECT ip, user_id, succeeded, created_at FROM login_log ORDER BY id ASC");
 my %user_succeed = ();
 for my $log ( @$logs ) {
   if ( $log->{succeeded} ) {
