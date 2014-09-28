@@ -75,7 +75,7 @@ sub attempt_login {
   }
 
   if ($user && calculate_password_hash($password, $user->{salt}) eq $user->{password_hash}) {
-    $self->login_log($ip, $user->{id});
+    $self->login_log(1, $login, $ip, $user->{id});
     return $user, undef;
   }
   elsif ($user) {
