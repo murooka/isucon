@@ -203,7 +203,7 @@ get '/mypage' => [qw(session)] => sub {
   my ($self, $c) = @_;
   my $user_id = $c->req->env->{'psgix.session'}->{user_id};
   my $user = $self->current_user($user_id);
-  my $last_login = $self->last_login;
+  my $last_login = $self->last_login($user_id);
   my $msg;
 
   if ($user) {
