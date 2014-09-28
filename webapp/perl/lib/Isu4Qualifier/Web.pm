@@ -126,6 +126,14 @@ sub locked_users {
   return $self->redis->smembers('locked_users') || [];
 };
 
+sub last_login {
+  my ($self, $user_id) = @_;
+  my $logs = $self->db->select_all(
+   'SELECT * FROM login_log WHERE succeeded = 1 AND user_id = ? ORDER BY id DESC LIMIT 2',
+   $user_id);
+  @$logs[-1];
+};
+
 sub login_log {
   my ($self, $ip, $user_id) = @_;
   $self->db->query(
@@ -195,10 +203,11 @@ get '/mypage' => [qw(session)] => sub {
   my ($self, $c) = @_;
   my $user_id = $c->req->env->{'psgix.session'}->{user_id};
   my $user = $self->current_user($user_id);
+  my $last_login = $self->last_login;
   my $msg;
 
   if ($user) {
-    $c->render('mypage.tx', { user => $user });
+    $c->render('mypage.tx', { user => $user, last_login => $last_login });
   }
   else {
     $self->set_flash($c, "You must be logged in");
